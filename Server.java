@@ -17,7 +17,7 @@ public class Server {
 	    	port = Integer.parseInt(args[0]);
 		}
 		
-		HashMap<String, HashMap<String, BigInteger>> keyValues = TunnelAgent.keyPair();
+		HashMap<String, HashMap<String, BigInteger>> keyValues = TunnelAgent.createPairOfKeys();
 
 		HashMap<String, BigInteger> serverPrivateKey = keyValues.get("private");
 		HashMap<String, BigInteger> serverPublicKey = keyValues.get("public");
@@ -67,7 +67,6 @@ public class Server {
 	        	BigInteger oneSideEncryptedAnswer = TunnelAgent.crypt(answer, serverPrivateKey);
 
 				// encrypt message with clients public key (to verify that only the client can decrypt with his private key)
-				//String twoSideEncryptedAnswer = clientPublicKey+"("+oneSideEncryptedAnswer+")";
 	        	BigInteger twoSideEncryptedAnswer = TunnelAgent.crypt(oneSideEncryptedAnswer, clientPublicKey);
 
 				// send encrypted answer

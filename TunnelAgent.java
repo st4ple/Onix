@@ -8,7 +8,7 @@ public class TunnelAgent {
 	 * This method returns a HashMap containing a HashMap each 
 	 * for a public/private RSA key pair. 
 	 */
-	public static HashMap<String, HashMap<String, BigInteger>> keyPair(){
+	public static HashMap<String, HashMap<String, BigInteger>> createPairOfKeys(){
 		HashMap<String, HashMap<String, BigInteger>> keyValues = new HashMap<String, HashMap<String, BigInteger>>();
 
 		Random rng = new Random(); 
@@ -59,6 +59,5 @@ public class TunnelAgent {
 			 return message.modPow(key.get("d"), key.get("n"));
 		}
 	}
-	
 	
 }
