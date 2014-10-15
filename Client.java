@@ -30,10 +30,10 @@ public class Client {
 				}
 			}
 		}
+		System.out.println("--------------------------------");
 		
 		// generate a key pair
 		HashMap<String, HashMap<String, BigInteger>> keyValues = TunnelAgent.createPairOfKeys();
-
 		HashMap<String, BigInteger> clientPrivateKey = keyValues.get("private");
 		HashMap<String, BigInteger> clientPublicKey = keyValues.get("public");
 		
@@ -59,9 +59,7 @@ public class Client {
         	// receive server public key so I can authenticate the servers messages and encrypt my messages
         	@SuppressWarnings("unchecked")
 			HashMap<String, BigInteger> serverPublicKey = (HashMap<String, BigInteger>) objectInputStream.readObject();
-        	if (verbose){
-    			System.out.println("Server Public Key received: "+clientPublicKey.toString());
-    		}
+        	if (verbose) System.out.println("Server Public Key received: "+serverPublicKey.toString());
       
         	// prepare request message
         	String clearRequest = message;
@@ -100,7 +98,8 @@ public class Client {
         	socket.close();
         	
         	if (verbose) System.out.println("Disconnected from server.");
-        	
+    		System.out.println("--------------------------------");
+
         } catch (IOException | ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
