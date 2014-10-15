@@ -9,31 +9,28 @@ public class Client {
 
 	public static void main(String[] args) {
 	   	
-		String IP = "localhost";
+		String host = "localhost";
 		int port = 4444;
-		String message = "This is just a test message!";
+		String message = "test";
 		boolean verbose = false;
-		int offset = 0;
 		
-		if(args.length > 0 ){
-			if (args[0].equals("-v")){
+        for (int i=0; i<args.length; i++){
+            if (args[i].equals("-v")){
 				verbose = true;
-				offset = 1;
-			}
-			if(args.length > (0+offset) ){
-				message = args[0+offset];
-				if(args.length > (1+offset) ){
-					port = Integer.parseInt(args[1+offset]);
-					if(args.length > (2+offset) ){
-						IP = args[2+offset];
-					}
-				}
-			}
-		}
-		System.out.println("--------------------------------");
-		
+            }
+            if (args[i].equals("-h") && args.length > (i+1)){
+                    host = args[i+1];
+            }
+            if (args[i].equals("-p") && args.length > (i+1)){
+                    port = Integer.parseInt(args[i+1]);
+            }
+            if (args[i].equals("-m") && args.length > (i+1)){
+                    message = args[i+1];
+            }
+        }
+        		
 		// generate a key pair
-		HashMap<String, HashMap<String, BigInteger>> keyValues = TunnelAgent.createPairOfKeys();
+		HashMap<String, HashMap<String, BigInteger>> keyValues = TunnelAgent.createPairOfKeys(verbose);
 		HashMap<String, BigInteger> clientPrivateKey = keyValues.get("private");
 		HashMap<String, BigInteger> clientPublicKey = keyValues.get("public");
 		
@@ -45,9 +42,11 @@ public class Client {
 		Socket socket = null;
 		ObjectOutputStream objectOutputStream = null;
 		ObjectInputStream objectInputStream = null;
+        
+        System.out.println("------------------------------");
 		
         try {
-        	socket = new Socket(IP, port);
+        	socket = new Socket(host, port);
         	if (verbose) System.out.println("Connected to server.");
 			objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
 			objectInputStream = new ObjectInputStream(socket.getInputStream());
@@ -64,7 +63,7 @@ public class Client {
         	// prepare request message
         	String clearRequest = message;
 			System.out.println("Clear request: "+clearRequest);
-        	BigInteger request = new BigInteger(clearRequest.getBytes());
+        	BigInteger request = TunnelAgent.stringToBigInteger(clearRequest);
         	
         	// encrypt message with my own private key (for server to verify that I'm the sender)
         	BigInteger oneSideEncryptedRequest = TunnelAgent.crypt(request, clientPrivateKey);
@@ -74,24 +73,28 @@ public class Client {
         	BigInteger twoSideEncryptedRequest = TunnelAgent.crypt(oneSideEncryptedRequest, serverPublicKey);
 			if (verbose) System.out.println("Encrypt request with Server Public Key.");
         	
-        	// send message
+        	// send encrypted request
 			objectOutputStream.writeObject(twoSideEncryptedRequest);
 			if (verbose) System.out.println("Encrypted request sent: "+twoSideEncryptedRequest);
 
-        	// receive answer from server
+        	// receive encrypted answer from server
         	BigInteger twoSideEncryptedAnswer = (BigInteger) objectInputStream.readObject();
 			if (verbose) System.out.println("Encrypted answer received: "+twoSideEncryptedAnswer);
+            
+            if (verbose) System.out.println("Coded answer message is smaller than n: " + (serverPublicKey.get("n").compareTo(twoSideEncryptedAnswer)==1));
 
         	// decrypt message with my own private key (to read the message sent by server)
         	BigInteger oneSideEncryptedAnswer = TunnelAgent.crypt(twoSideEncryptedAnswer, clientPrivateKey);
 			if (verbose) System.out.println("Decrypt answer with Client Private Key.");
+            if (verbose) System.out.println("Coded answer message is smaller than n: " + (serverPublicKey.get("n").compareTo(oneSideEncryptedAnswer)==1));
         	
         	// decrypt message with server public key (to verify that messages was sent by server)
         	BigInteger answer = TunnelAgent.crypt(oneSideEncryptedAnswer, serverPublicKey);
-			if (verbose) System.out.println("Decrypt request with Server Public Key.");
+			if (verbose) System.out.println("Decrypt answer with Server Public Key.");
+            if (verbose) System.out.println("Coded answer message is smaller than n: " + (serverPublicKey.get("n").compareTo(answer)==1));
         	
         	// handle the answer received from server
-        	String clearAnswer = new String(answer.toByteArray());
+        	String clearAnswer = new String(TunnelAgent.bigIntegerToString(answer));
         	System.out.println("Clear answer: "+clearAnswer);
         	
         	// close connection
@@ -100,7 +103,10 @@ public class Client {
         	if (verbose) System.out.println("Disconnected from server.");
     		System.out.println("--------------------------------");
 
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException i){
+            if (verbose) System.out.println("Oops, something went wrong. Retrying.");
+                main(args);
+        } catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}   
