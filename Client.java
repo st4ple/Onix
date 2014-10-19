@@ -34,19 +34,15 @@ public class Client {
 		HashMap<String, BigInteger> clientPrivateKey = keyValues.get("private");
 		HashMap<String, BigInteger> clientPublicKey = keyValues.get("public");
 		
-		if (verbose){
-			System.out.println("Client Private Key created: "+clientPrivateKey.toString());
-			System.out.println("Client Public Key created: "+clientPublicKey.toString());
-		}
+        if (verbose) System.out.println("Attempting to connect to server.");
 				
 		Socket socket = null;
 		ObjectOutputStream objectOutputStream = null;
 		ObjectInputStream objectInputStream = null;
-        
-        System.out.println("------------------------------");
-		
+        		
         try {
         	socket = new Socket(host, port);
+            if (verbose) System.out.println("******** TUNNEL-START *********");
         	if (verbose) System.out.println("Connected to server.");
 			objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
 			objectInputStream = new ObjectInputStream(socket.getInputStream());
@@ -86,12 +82,10 @@ public class Client {
         	// decrypt message with my own private key (to read the message sent by server)
         	BigInteger oneSideEncryptedAnswer = TunnelAgent.crypt(twoSideEncryptedAnswer, clientPrivateKey);
 			if (verbose) System.out.println("Decrypt answer with Client Private Key.");
-            if (verbose) System.out.println("Coded answer message is smaller than n: " + (serverPublicKey.get("n").compareTo(oneSideEncryptedAnswer)==1));
         	
         	// decrypt message with server public key (to verify that messages was sent by server)
         	BigInteger answer = TunnelAgent.crypt(oneSideEncryptedAnswer, serverPublicKey);
 			if (verbose) System.out.println("Decrypt answer with Server Public Key.");
-            if (verbose) System.out.println("Coded answer message is smaller than n: " + (serverPublicKey.get("n").compareTo(answer)==1));
         	
         	// handle the answer received from server
         	String clearAnswer = new String(TunnelAgent.bigIntegerToString(answer));
@@ -101,10 +95,10 @@ public class Client {
         	socket.close();
         	
         	if (verbose) System.out.println("Disconnected from server.");
-    		System.out.println("--------------------------------");
+            if (verbose) System.out.println("********* TUNNEL-END **********");
 
         } catch (IOException i){
-            if (verbose) System.out.println("Oops, something went wrong. Retrying.");
+            if (verbose) System.out.println("******** TUNNEL-ABORT *********");
                 main(args);
         } catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block

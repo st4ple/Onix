@@ -27,11 +27,6 @@ public class Server {
 		HashMap<String, BigInteger> serverPrivateKey = keyValues.get("private");
 		HashMap<String, BigInteger> serverPublicKey = keyValues.get("public");
 		
-		if (verbose){
-			System.out.println("Server Private Key created: "+serverPrivateKey.toString());
-			System.out.println("Server Public Key created: "+serverPublicKey.toString());
-		}
-		
 		ObjectOutputStream objectOutputStream = null;
 		ObjectInputStream objectInputStream = null;
 		ServerSocket serverSocket = null;
@@ -43,7 +38,7 @@ public class Server {
                 System.out.println("Listening on socket on port "+port+".");
 	    		// Open socket for new Client that connects
 	    		Socket ms = serverSocket.accept();
-                System.out.println("--------------------------------");
+                if (verbose) System.out.println("******** TUNNEL-START *********");
 	        	if (verbose) System.out.println("A client has connected.");
 			
 				objectOutputStream = new ObjectOutputStream(ms.getOutputStream());
@@ -97,10 +92,12 @@ public class Server {
                     // close connection to client
                     ms.close();
 
-                    if (verbose) System.out.println("Connection to client closed.");	
+                    if (verbose) System.out.println("Connection to client closed.");
+                    if (verbose) System.out.println("********* TUNNEL-END **********");
                 }
                 else{
                     if (verbose) System.out.println("Oops, something went wrong. Retrying.");
+                    if (verbose) System.out.println("******** TUNNEL-ABORT *********");
                 }
                 ms.close();
                     

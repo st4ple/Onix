@@ -14,7 +14,7 @@ public class TunnelAgent {
 		Random rng = new Random(); 
 		BigInteger p, q, n, v, e, d;            
 
-        if (verbose) System.out.println("**********RSA-START**********");
+        if (verbose) System.out.println("********** RSA-START **********");
         
 		// assign prime values to p and q
 		p = BigInteger.probablePrime(64, rng);
@@ -41,11 +41,6 @@ public class TunnelAgent {
         // verify that keys are correct
         if (verbose) System.out.println("gcd(e,v) = "+e.gcd(v));
         if (verbose) System.out.println("(d*e)%v = "+(d.multiply(e)).mod(v));
-        if (verbose) System.out.println("e < v: " + (v.compareTo(e)==1));
-        
-        // n = new BigInteger("3233");
-        // e = new BigInteger("1013");
-        // d = new BigInteger("77");
 		
 		// make a HashMap for both of the keys, containing e, n for the public key and d, n for the private key
 		HashMap<String, BigInteger> publicKey = new HashMap<String, BigInteger>();
@@ -59,8 +54,11 @@ public class TunnelAgent {
 		keyValues.put("private", privateKey);
 		keyValues.put("public", publicKey);
         
-        if (verbose) System.out.println("***********RSA-END***********");
-
+        if (verbose){
+			System.out.println("Private Key: "+privateKey.toString());
+			System.out.println("Public Key: "+publicKey.toString());
+            System.out.println("*********** RSA-END ***********");
+		}
 		return keyValues;
 	}
     
@@ -74,44 +72,21 @@ public class TunnelAgent {
 	 * It isn't responsible to ensure that the utilization of the given 
 	 * key on the given message actually makes any sense!
 	 */
-	public static BigInteger crypt(BigInteger message, HashMap<String, BigInteger> key, boolean verbose){
-        if (verbose) System.out.println("**********CRYPT-START**********");
+	public static BigInteger crypt(BigInteger message, HashMap<String, BigInteger> key){
         if (key.containsKey("e")){
-            if (verbose) System.out.println("***********CRYPT-END***********");
 	    	return message.modPow(key.get("e"), key.get("n"));
 		}
 		else {
-            if (verbose) System.out.println("***********CRYPT-END***********");
             return message.modPow(key.get("d"), key.get("n"));
 		}
 	}
-    
-    public static BigInteger crypt(BigInteger message, HashMap<String, BigInteger> key){
-		return crypt(message, key, false);
-	}
-    
      
     public static BigInteger stringToBigInteger(String str){
-        /* BigInteger bigInt = new BigInteger("0");
-        BigInteger constant = new BigInteger("1000");
-        String tmp;
-        for (char c : str.toCharArray()){
-            tmp = ((int)c).toString();
-            bigInt.add(BigInteger(tmp));
-            bigInt.mulitply(constant);
-        }
-        bigInt.divide(constant);
-        return bigInt; */
         byte[] strBytes = str.getBytes();
         return new BigInteger(strBytes);
     }
     
     public static String bigIntegerToString(BigInteger bigInt){
-        /* BigInteger constant = new BigInteger("1000");
-        String string "";
-        while (bigInt.compareTo(BigInteger.ONE)==1){
-            
-        return c.toString(); */
         return new String(bigInt.toByteArray());
     }
     
