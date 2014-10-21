@@ -1,7 +1,7 @@
 Onix
 ====
 
-Small tool that creates an RSA tunnel from client to server.
+Small tool that creates an RSA tunnel from client to server and vice-versa. At the moment, the client sends the server an encrypted message, to which the server returns an answer equal to message.UPPERCASE.
 
 ##Usage
 #####Compile:
