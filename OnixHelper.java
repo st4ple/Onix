@@ -3,7 +3,7 @@ import java.util.HashMap;
 import java.util.Random;
 
 
-public class TunnelAgent {
+public class OnixHelper {
     /* 
      * This method returns a HashMap containing a HashMap each 
      * for a public/private RSA key pair. 

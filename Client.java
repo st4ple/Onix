@@ -30,7 +30,7 @@ public class Client {
         }
 
         // generate a key pair
-        HashMap<String, HashMap<String, BigInteger>> keyValues = TunnelAgent.createPairOfKeys(verbose);
+        HashMap<String, HashMap<String, BigInteger>> keyValues = OnixHelper.createPairOfKeys(verbose);
         HashMap<String, BigInteger> clientPrivateKey = keyValues.get("private");
         HashMap<String, BigInteger> clientPublicKey = keyValues.get("public");
 
@@ -59,14 +59,14 @@ public class Client {
             // prepare request message
             String clearRequest = message;
             System.out.println("Clear request: "+clearRequest);
-            BigInteger request = TunnelAgent.stringToBigInteger(clearRequest);
+            BigInteger request = OnixHelper.stringToBigInteger(clearRequest);
 
             // encrypt message with my own private key (for server to verify that I'm the sender)
-            BigInteger oneSideEncryptedRequest = TunnelAgent.crypt(request, clientPrivateKey);
+            BigInteger oneSideEncryptedRequest = OnixHelper.crypt(request, clientPrivateKey);
             if (verbose) System.out.println("Encrypt request with Client Private Key.");
 
             // encrypt message with server public key (to verify that only server can decrypt with his private key)
-            BigInteger twoSideEncryptedRequest = TunnelAgent.crypt(oneSideEncryptedRequest, serverPublicKey);
+            BigInteger twoSideEncryptedRequest = OnixHelper.crypt(oneSideEncryptedRequest, serverPublicKey);
             if (verbose) System.out.println("Encrypt request with Server Public Key.");
 
             // send encrypted request
@@ -80,15 +80,15 @@ public class Client {
             if (verbose) System.out.println("Coded answer message is smaller than n: " + (serverPublicKey.get("n").compareTo(twoSideEncryptedAnswer)==1));
 
             // decrypt message with my own private key (to read the message sent by server)
-            BigInteger oneSideEncryptedAnswer = TunnelAgent.crypt(twoSideEncryptedAnswer, clientPrivateKey);
+            BigInteger oneSideEncryptedAnswer = OnixHelper.crypt(twoSideEncryptedAnswer, clientPrivateKey);
             if (verbose) System.out.println("Decrypt answer with Client Private Key.");
 
             // decrypt message with server public key (to verify that messages was sent by server)
-            BigInteger answer = TunnelAgent.crypt(oneSideEncryptedAnswer, serverPublicKey);
+            BigInteger answer = OnixHelper.crypt(oneSideEncryptedAnswer, serverPublicKey);
             if (verbose) System.out.println("Decrypt answer with Server Public Key.");
 
             // handle the answer received from server
-            String clearAnswer = new String(TunnelAgent.bigIntegerToString(answer));
+            String clearAnswer = new String(OnixHelper.bigIntegerToString(answer));
             System.out.println("Clear answer: "+clearAnswer);
 
             // close connection
