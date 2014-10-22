@@ -9,11 +9,12 @@ import java.util.HashMap;
 public class Server {
 
     public static void main(String[] args){		
-
+        
+        // set some defualt values, these might be overridden by the input arguments
         int port = 4444;
         boolean verbose = false;
-        int offset = 0;
 
+        // parse input arguments
         for (int i=0; i<args.length; i++){
             if (args[i].equals("-v")){
                 verbose = true;
@@ -21,8 +22,15 @@ public class Server {
             if (args[i].equals("-p") && args.length > (i+1)){
                 port = Integer.parseInt(args[i+1]);
             }
+            if (args[i].equals("-h")){
+                System.out.println("Usage: java Server (-p <port_number>) (-v)");
+                System.out.println("args: -p <port_number> => the port number of where the server listens for clients");
+                System.out.println("      -v               => to receive verbose output of events when running the server");
+                System.exit(1);
+            }
         }
 
+        // generate a key pair
         HashMap<String, HashMap<String, BigInteger>> keyValues = OnixHelper.createPairOfKeys(verbose);
         HashMap<String, BigInteger> serverPrivateKey = keyValues.get("private");
         HashMap<String, BigInteger> serverPublicKey = keyValues.get("public");
@@ -33,7 +41,8 @@ public class Server {
 
         try {
             serverSocket = new ServerSocket(port);
-
+            
+            // the server runs until it is stopped manually by the callee
             while(true){
                 System.out.println("Listening on socket on port "+port+".");
                 // Open socket for new Client that connects
@@ -74,7 +83,9 @@ public class Server {
                 BigInteger answer = OnixHelper.stringToBigInteger(clearAnswer);
                 System.out.println("Clear answer: "+clearAnswer);
                 if (verbose) System.out.println("Coded answer message is smaller than n: " + (serverPublicKey.get("n").compareTo(answer)==1));
-
+                
+                // check if the numerical value of the encoded answer is smaller than n.
+                // if this is the case, go ahead with encryption
                 if (serverPublicKey.get("n").compareTo(answer)==1){
 
                     // encrypt message with own private key (to verify to client that I'm the sender)
@@ -96,18 +107,18 @@ public class Server {
                     if (verbose) System.out.println("********* TUNNEL-END **********");
                 }
                 
+                // in the rare case that the numerical value of the encoded answer is bigger than n, abort the tunnel and try again. 
                 else {
+                    ms.close();
                     if (verbose) System.out.println("Oops, something went wrong. Retrying.");
                     if (verbose) System.out.println("******** TUNNEL-ABORT *********");
                 }
-
-                ms.close();
-
+                
             }
 
         }
-        catch (IOException e) { System.out.println("IO"); } 
-        catch (ClassNotFoundException e) { System.out.println("Class"); }
+        catch (IOException e) { System.out.println("IOException"); } 
+        catch (ClassNotFoundException e) { System.out.println("ClassNotFoundException"); }
     }
 
 }

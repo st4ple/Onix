@@ -27,6 +27,15 @@ public class Client {
             if (args[i].equals("-m") && args.length > (i+1)){
                 message = args[i+1];
             }
+            if (args[i].equals("-h")){
+                System.out.println("Usage: java Client (-m <message>) (-h <host_address>) (-p <port_number>) (-v)");
+                System.out.println("args: -m <message>      => the message that should be sent through the  RSA tunnel");
+                System.out.println("                           (currently only short messages of few characters work properly");
+                System.out.println("      -h <host_address> => the address of the server to connect to");
+                System.out.println("      -p <port_number>  => the port number of the server to connect to");
+                System.out.println("      -v                => to receive verbose output of events when running the client");
+                System.exit(1);
+            }
         }
 
         // generate a key pair
